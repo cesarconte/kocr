@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Cesar <yugurta@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
+# kocr: Extracción de texto de pantalla en un clic (OCR cotidiano para KDE Plasma 6 / Wayland)
+
+set -eo pipefail
+
+TESS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tessdata"
+if [ ! -d "$TESS_DIR" ]; then
+    TESS_DIR="/usr/share/tessdata"
+fi
+export TESSDATA_PREFIX="$TESS_DIR"
+
+TEMP_IMG="/dev/shm/kocr_${$}_${RANDOM}.png"
+trap 'rm -f "$TEMP_IMG"' EXIT INT TERM
+
+# 1. Capturar región seleccionada con Spectacle de forma silenciosa y no interactiva
+if ! spectacle -r -b -n -k -o "$TEMP_IMG" 2>/dev/null; then
+    exit 0
+fi
+
+# 2. Verificar que se haya capturado una imagen válida
+if [ ! -s "$TEMP_IMG" ]; then
+    exit 0
+fi
+
+# 3. Extraer texto usando Tesseract con soporte en español e inglés
+RAW_TEXT=$(tesseract "$TEMP_IMG" stdout --tessdata-dir "$TESS_DIR" -l spa+eng --oem 1 --psm 6 --loglevel ERROR 2>/dev/null || true)
+
+# 4. Limpieza del texto extraído
+CLEAN_TEXT=$(echo "$RAW_TEXT" | awk '
+    NF {
+        if (blank) { print ""; blank = 0 }
+        print
+    }
+    !NF { blank = 1 }
+' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+# 5. Si hay texto, copiar a portapapeles y notificar
+if [ -n "$CLEAN_TEXT" ]; then
+    echo -n "$CLEAN_TEXT" | wl-copy
+
+    # Generar vista previa de hasta 3 líneas / 140 caracteres
+    PREVIEW=$(echo "$CLEAN_TEXT" | head -n 3 | cut -c 1-140)
+    if [ $(echo "$CLEAN_TEXT" | wc -l) -gt 3 ] || [ ${#CLEAN_TEXT} -gt 140 ]; then
+        PREVIEW="${PREVIEW}…"
+    fi
+
+    notify-send -a "Screen OCR" \
+                -i edit-copy \
+                "📝 Texto extraído y copiado (OCR)" \
+                "$PREVIEW" \
+                -t 4000 2>/dev/null || true
+else
+    notify-send -a "Screen OCR" \
+                -i edit-find \
+                "🔍 Sin texto detectado" \
+                "No se reconoció texto en el área capturada." \
+                -t 3000 2>/dev/null || true
+fi

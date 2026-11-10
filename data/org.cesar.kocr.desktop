@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Extracción de Texto OCR
+Name[es]=Extracción de Texto OCR
+GenericName=OCR de Pantalla
+GenericName[es]=OCR de Pantalla
+Comment=Extrae texto de cualquier región de la pantalla directamente al portapapeles
+Comment[es]=Extrae texto de cualquier región de la pantalla directamente al portapapeles
+Exec=/home/cesar/.local/bin/kocr
+Icon=edit-copy
+Terminal=false
+Type=Application
+Categories=Utility;Accessibility;Core;
+Keywords=ocr;texto;screen;captura;tesseract;reconocimiento;copiar;
+StartupNotify=false
+X-KDE-GlobalAccel=true
