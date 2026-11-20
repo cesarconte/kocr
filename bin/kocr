@@ -5,9 +5,10 @@
 
 set -eo pipefail
 
-TESS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tessdata"
-if [ ! -d "$TESS_DIR" ]; then
+if [ -d "/usr/share/tessdata" ]; then
     TESS_DIR="/usr/share/tessdata"
+else
+    TESS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tessdata"
 fi
 export TESSDATA_PREFIX="$TESS_DIR"
 
@@ -48,13 +49,13 @@ if [ -n "$CLEAN_TEXT" ]; then
 
     notify-send -a "Screen OCR" \
                 -i edit-copy \
-                "📝 Texto extraído y copiado (OCR)" \
+                "Texto extraído y copiado (OCR)" \
                 "$PREVIEW" \
                 -t 4000 2>/dev/null || true
 else
     notify-send -a "Screen OCR" \
                 -i edit-find \
-                "🔍 Sin texto detectado" \
+                "Sin texto detectado" \
                 "No se reconoció texto en el área capturada." \
                 -t 3000 2>/dev/null || true
 fi

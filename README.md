@@ -35,7 +35,7 @@ cd kocr
 ./install.sh
 ```
 
-El script verificará las dependencias (`spectacle`, `tesseract`, `wl-clipboard`, `libnotify`), instalará el binario en `~/.local/bin`, configurará los diccionarios en `~/.local/share/tessdata/` y registrará el atajo global `Meta+Shift+O` en KDE Plasma.
+El script verificará las dependencias (`spectacle`, `tesseract`, `wl-clipboard`, `libnotify`), instalará el binario en `/usr/bin/kocr`, el lanzador en `/usr/share/applications/org.cesar.kocr.desktop` y registrará el atajo global `Meta+Shift+O` en KDE Plasma.
 
 ---
 
